@@ -103,8 +103,17 @@ I promise that the expected result is correct.
 go test -v
 ```
 
+Removing the `-v` will cause only test failures to be displayed.
+
 If your program does not compile it will show those errors and not run the
 tests.
+
+## Editor Support
+
+I highly recommend taking a minute to install the Go plugin for your favorite
+editor. Both Sublime Text
+([gosublime]([200~https://github.com/DisposaBoy/GoSublime])) and VS Code (Just
+search for the Go extension) have great plugins for editing Go code.
 
 ## Fill in the Blanks
 

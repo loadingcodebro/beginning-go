@@ -23,6 +23,10 @@ pushed messages, and push its own messages.
 Currently the [gossip library](https://github.com/clockworksoul/smudge) we are
 using is limited to LAN connections only.
 
+## Demo
+
+[![asciicast](https://asciinema.org/a/G4YYRdotQIDQtb66n2lU1aQle.png)](https://asciinema.org/a/G4YYRdotQIDQtb66n2lU1aQle)
+
 # Creating the Chat Client
 
 ## Assumptions

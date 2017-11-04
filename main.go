@@ -19,10 +19,6 @@ const (
 	heartbeatMillis = 500
 )
 
-// TODO: Add unit and benchmark tests which fail in the not-complete
-// implementation. Then students can still be given something which compiles, it
-// just doesn't work.
-
 var (
 	// variables declared within "var" are mutable in Go. They can be explicitly
 	// initialized to a value, or if not set explicitly, default to the "empty
@@ -46,27 +42,35 @@ var (
 
 	// localAddress is the NodeAddress which other Clients will use to reach us.
 	localAddress NodeAddress
+
+	unittestMode = false
 )
 
 // printDebug outputs a log message with the "DEBUG:" prefix. This function can
 // be edited to easily enable and disable debugging logs without removing all
 // the log lines in the codebase.
 func printDebug(msg string, args ...interface{}) {
-	printLogs(fmt.Sprintf("DEBUG: "+msg, args...))
+	if !unittestMode {
+		printLogs(fmt.Sprintf("DEBUG: "+msg, args...))
+	}
 }
 
 // printInfo outputs a log message with the "INFO:" prefix. This function can
 // be edited to easily enable and disable debugging logs without removing all
 // the log lines in the codebase.
 func printInfo(msg string, args ...interface{}) {
-	printLogs(fmt.Sprintf("INFO: "+msg, args...))
+	if !unittestMode {
+		printLogs(fmt.Sprintf("INFO: "+msg, args...))
+	}
 }
 
 // printError outputs a log message with the "ERROR:" prefix. This function can
 // be edited to easily enable and disable error logs without removing all
 // the log lines in the codebase.
 func printError(msg string, args ...interface{}) {
-	printLogs(fmt.Sprintf("ERROR: "+msg, args...))
+	if !unittestMode {
+		printLogs(fmt.Sprintf("ERROR: "+msg, args...))
+	}
 }
 
 // cacheLocalIP populates the value of the localAddress global variable.
@@ -135,7 +139,11 @@ func main() {
 			printError("Failed to create a new node from addr: ", err)
 			os.Exit(1)
 		} else {
-			smudge.AddNode(node)
+			_, err = smudge.AddNode(node)
+			if err != nil {
+				printError("Failed to add a node to Smudge: ", err)
+				os.Exit(1)
+			}
 		}
 	}
 

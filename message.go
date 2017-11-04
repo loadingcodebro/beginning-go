@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/clockworksoul/smudge"
@@ -70,7 +71,10 @@ func (m *message) Encode() []byte {
 	if err != nil {
 		printError("Failed to marshal a chat message to send: %s", err)
 	}
-	w.Close() // The bytes might not actually be written until closed (or flushed)
+	err = w.Close() // The bytes might not actually be written until closed (or flushed)
+	if err != nil {
+		printError("Failed to close the encoding writer: %s", err)
+	}
 
 	// read out the contents from our temporary buffer, and return them
 	return b.Bytes()
@@ -91,6 +95,27 @@ type Messenger struct {
 	clients ClientList
 }
 
+// Decode converts the byte slice received from a broadcast into a usable
+// message. This is the reverse of the Encode() operation.
+//
+// Just like how the encode method above uses the json and zlib packages to
+// json marshal and then compress a message, here we are doing the reverse.
+func (m *message) Decode(data []byte) error {
+	bb := bytes.NewReader(data)
+	r, err := zlib.NewReader(bb)
+	if err != nil {
+		return fmt.Errorf("Failed to decompress message: %s", err)
+	}
+
+	// msg is what the decompressed bytes will be un-json-marshalled into
+	err = json.NewDecoder(r).Decode(m)
+	if err != nil {
+		return fmt.Errorf("Failed to decode message: %s", err)
+	}
+
+	return nil
+}
+
 // OnBroadcast is the only method defined on the smudge.BroadcastListener
 // interface. By implementing this method on the Messenger struct, that struct
 // will satisfy the interface and we can register it with smudge.
@@ -101,20 +126,11 @@ func (m *Messenger) OnBroadcast(b *smudge.Broadcast) {
 	senderAddr := NodeAddress(b.Origin().Address())
 
 	printDebug("Received %d bytes", len(b.Bytes()))
-
-	// Just like how the encode method above uses the json and zlib packages to
-	// json marshal and then compress a message, here we are doing the reverse.
-	bb := bytes.NewReader(b.Bytes())
-	r, err := zlib.NewReader(bb)
+	var msg message
+	err := msg.Decode(b.Bytes())
 	if err != nil {
-		printError("Failed to decompress message from %q: %s", senderAddr, err)
-	}
-
-	// msg is what the decompressed bytes will be un-json-marshalled into
-	msg := message{}
-	err = json.NewDecoder(r).Decode(&msg)
-	if err != nil {
-		printError("Failed to decode message from %q: %s", senderAddr, err)
+		printError("Failed to receive message from %s: %s", senderAddr, err)
+		return
 	}
 
 	switch msg.Type {

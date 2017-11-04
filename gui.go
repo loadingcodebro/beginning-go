@@ -86,7 +86,10 @@ func layout(g *gocui.Gui) error {
 		v.Title = "Logs"
 		v.Autoscroll = true
 		v.Wrap = true
-		g.SetViewOnBottom("logs")
+		_, err = g.SetViewOnBottom("logs")
+		if err != nil {
+			return err
+		}
 	}
 
 	if v, err := g.SetView("help", 0, helpY, maxX, maxY); err != nil {
@@ -143,8 +146,7 @@ func readGuiMsg(g *gocui.Gui, v *gocui.View) error {
 		return err
 	}
 
-	SendMessage(msgText)
-	return nil
+	return SendMessage(msgText)
 }
 
 func printChatMessage(msg, sender string) {
@@ -159,8 +161,8 @@ func printChatMessage(msg, sender string) {
 	})
 }
 
-// NOTE TO SELF: CHANGE THIS FROM CLIENT LIST TO SOMETHING THAT IS AN INTERFACE
-// SO I AM NOT DICTATING THE STRUCTURE OF THEIR PROGRAM
+// printClientList takes a ClientList and prints the username or NodeAddress for
+// each entry into the clients section of the UI.
 func printClientList(cl ClientList) {
 	if gui == nil {
 		return
@@ -173,7 +175,10 @@ func printClientList(cl ClientList) {
 		}
 
 		v.Clear()
-		v.SetCursor(0, 0)
+		err = v.SetCursor(0, 0)
+		if err != nil {
+			return err
+		}
 
 		for _, client := range cl {
 			fmt.Fprintln(v, client.GetName())

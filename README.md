@@ -54,6 +54,32 @@ either by cloning the git repository, or just by downloading a zip of the files.
 
 ## Building and Running
 
+### A Windows Caveat
+
+Go is fairly opinionated about how the source code is structured. The computers
+should already have Go installed, but when Go looks for code to build it will
+check in the `%USERPROFILE%\go` directory. To get everything working nicely,
+open a new File Explorer and in the address bar type `%USERPROFILE%` and press
+enter. Next, create a series of nested directories so you end up with this exact
+path (don't replace the name):
+
+```
+%USERPROFILE%\go\src\tgrosinger\beginning-go
+```
+
+Finally, put the source code you downloaded in that final folder after
+unzipping. You should end up with a file at the path:
+`%USERPROFILE%\go\src\tgrosinger\beginning-go\main.go`
+
+### Another Windows Caveat
+
+For the following commands to run we need to have our command prompt in the
+right directory. The easiest way to do that is to hold shift+ctrl and right
+click in the file explorer we navigated to in the previous step. Click "Open
+command window here"
+
+### Back to Building and Running
+
 Let's see where the code has gotten us started. After taking a quick look
 through `main.go` (or before if you want), run the following set of commands to
 build and execute the beginnings of your chat client implementation.

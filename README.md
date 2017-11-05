@@ -1,24 +1,24 @@
 # Beginning Go - A Chat Client
 
-Welcome! This repository contains the template for
-a [gossip](https://en.wikipedia.org/wiki/Gossip_protocol)-based chat client
-which is designed to be an introduction project for programmers looking to learn
+Welcome! This repository contains the framework for an implementation of
+a [gossip](https://en.wikipedia.org/wiki/Gossip_protocol)-based chat client,
+designed to be an introductory project for programmers looking to learn
 more about the [Go programming language](https://golang.org/). This file will
-guide you from getting started all the way to connecting to other chat clients.
+guide you through the process: from getting started to connecting your
+implementation to others.
 
 ## What Makes this Chat Client Special
 
 Other than you writing it?
 
 By using the gossip protocol, this chat system is 100% decentralized. As long as
-one client remains active, the chat history will be maintained. To join the chat
-room a client needs only enter the connection information for any other
-connected client.
+one client remains active, the chat cluster is maintained. To join the chat room
+a client needs only enter the connection address of any other connected client.
 
 Once connected, the gossip library we are using will tell other clients that you
 have connected. In addition to now showing up in their list of connected users,
-your client will now be able to periodically poll for new messages, receive
-pushed messages, and push its own messages.
+your client will receive pushed messages, and push its messages to everyone else
+in the cluster.
 
 Currently the [gossip library](https://github.com/clockworksoul/smudge) we are
 using is limited to LAN connections only.
@@ -44,9 +44,10 @@ instructions](https://golang.org/doc/install).
 ## Obtaining the Source
 
 To fit within the time limits of the class, and to ensure everyone writes
-compatible chat clients, a template client has been created for you to complete.
-You can obtain it either by cloning the git repository, or just by downloading
-a zip of the files.
+compatible chat clients, a template client has been created which implements the
+UI updates and the data structures. Your job will be to fill in the missing
+pieces, make sure the unit tests pass, and test with others. You can obtain it
+either by cloning the git repository, or just by downloading a zip of the files.
 
 > [Download the
 > files](https://github.com/tgrosinger/Beginning-Go-Project/archive/master.zip)
@@ -58,14 +59,31 @@ through `main.go` (or before if you want), run the following set of commands to
 build and execute the beginnings of your chat client implementation.
 
 ```cmd
-Fill out instructions here
+go build
 ```
+
+That's it. Go will drop a binary in the root of the project called
+`beginning-go`. If you run it with only the flag `-h` it will provide you with
+info about the other runtime flags.
 
 ## Run the Unit Tests
 
+Running the unit tests is the fastest method for checking most of the
+functionality you are responsible for implementing. When running the tests, the
+output will show both the result from running, and the expected result.
+I promise that the expected result is correct.
+
+```
+go test -v
+```
+
+If your program does not compile it will show those errors and not run the
+tests.
 
 ## Fill in the Blanks
 
+Read through the code, run the unit tests, implement the missing parts. Remember
+to work with your partner, and ask another group if you get stuck.
 
 ## Connect to Others
 

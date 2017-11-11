@@ -28,17 +28,15 @@ var (
 	// otherClient specifies the address of one running instance of the client.
 	// If omitted, this client will not initiate a connection to any existing
 	// client (i.e. this is the first client in a cluster)
-	otherClient = flag.String("client", "",
-		"Address of an existing client, if empty do not attempt to connect")
+	otherClient string
 
 	// listenPort is where this client will listen for other clients connecting.
 	// Must not be left empty.
-	listenPort = flag.Int("listenport", 0,
-		"Port on which client listens for connections to other clients")
+	listenPort int
 
-	// username is the friendly name we will present to other clients instead of
-	// our address. Must not be left empty.
-	username = flag.String("username", "", "Friendly name for this client")
+	// localUsername is the friendly name we will present to other clients
+	// instead of our address. Must not be left empty.
+	localUsername string
 
 	// localAddress is the NodeAddress which other Clients will use to reach us.
 	localAddress NodeAddress
@@ -95,20 +93,26 @@ func cacheLocalIP() {
 	// return type of https://golang.org/pkg/flag/#Int
 	// Prepending our use of listenPort with a * will dereference the pointer,
 	// giving us a normal int.
-	localAddress = NodeAddress(fmt.Sprintf("%s:%d", localIP, *listenPort))
+	localAddress = NodeAddress(fmt.Sprintf("%s:%d", localIP, listenPort))
 }
 
 // main is the entry point to the application.
 func main() {
 	// Populate the flag variables at the top of this file with input from the
 	// user. Afterwards, determine if any required values were omitted.
+	flag.StringVar(&localUsername, "username", "",
+		"Friendly name for this client")
+	flag.IntVar(&listenPort, "listenport", 0,
+		"Port on which client listens for connections to other clients")
+	flag.StringVar(&otherClient, "client", "",
+		"Address of an existing client, if empty do not attempt to connect")
 	flag.Parse()
 
-	if *listenPort == 0 {
+	if listenPort == 0 {
 		printError("Listen port is required")
 		flag.Usage()
 		os.Exit(1)
-	} else if *username == "" {
+	} else if localUsername == "" {
 		printError("Username is required")
 		flag.Usage()
 		os.Exit(1)
@@ -119,7 +123,7 @@ func main() {
 	// example on the project homepage: https://github.com/clockworksoul/smudge#everything-in-one-place
 
 	// Set configuration options
-	smudge.SetListenPort(*listenPort)
+	smudge.SetListenPort(listenPort)
 	smudge.SetHeartbeatMillis(heartbeatMillis)
 
 	// Add the status listener
@@ -132,10 +136,10 @@ func main() {
 
 	// Only attempt to connect to another client if the address for one was
 	// provided. If not, the client will sit and wait until a client connects.
-	if *otherClient != "" {
+	if otherClient != "" {
 		// Add a new remote node. To join an existing cluster you must
 		// add at least one of its healthy member nodes.
-		if node, err := smudge.CreateNodeByAddress(*otherClient); err != nil {
+		if node, err := smudge.CreateNodeByAddress(otherClient); err != nil {
 			printError("Failed to create a new node from addr: ", err)
 			os.Exit(1)
 		} else {

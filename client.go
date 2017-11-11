@@ -38,17 +38,21 @@ func (cl ClientList) OnChange(node *smudge.Node, status smudge.NodeStatus) {
 	printClientList(cl)
 }
 
-// AddClient creates a ChatCLient for the provided node and inserts it into the
+// AddClient creates a ChatClient for the provided node and inserts it into the
 // ClientList. If the node is ourselves, sets our username on the created
 // ChatClient.
 func (cl ClientList) AddClient(node *smudge.Node) {
+	// We need to create a new ChatClient to store in our ClientList. Learn
+	// about creating structs here: https://gobyexample.com/structs
 	newClient := ChatClient{
 		node: node,
 	}
 
-	// The node being added is us! We know our username, so set it.
+	// If the node being added is us (the address matches localAddress) then we
+	// should add our username to the ChatClient object (localUsername).
+
 	if NodeAddress(node.Address()) == localAddress {
-		newClient.username = *username
+		newClient.username = localUsername
 	}
 
 	cl[NodeAddress(node.Address())] = newClient
@@ -57,6 +61,11 @@ func (cl ClientList) AddClient(node *smudge.Node) {
 // RemoveClient deletes a ChatClient from the ClientList if it exists, based on
 // the information from the provided node.
 func (cl ClientList) RemoveClient(node *smudge.Node) {
+	// ClientList is a map from NodeAddress to a ChatClient. We can get the node
+	// address from the provided node by calling the "Address()" function on the
+	// Node, but that gives us a string. Casting to a NodeAddress is required
+	// before looking up in the map.
+
 	if client, exists := cl[NodeAddress(node.Address())]; exists {
 		if client.username != "" {
 			printDebug("Removing a node: %s", node.Address())
@@ -65,8 +74,9 @@ func (cl ClientList) RemoveClient(node *smudge.Node) {
 	}
 }
 
-// AddUsernames takes a compressed JSON map of NodeAddress->Username pairings
-// and fills in any missing values from the local client list.
+// AddUsernames takes a map of NodeAddress->Username pairings and fills the
+// ClientList with the usernames provided. It is possible that a node may change
+// username, in which case the map should be updated.
 func (cl ClientList) AddUsernames(usernames map[NodeAddress]string) error {
 	printDebug("Received username list containing: %+v", usernames)
 
@@ -91,9 +101,13 @@ func (cl ClientList) AddUsernames(usernames map[NodeAddress]string) error {
 	return nil
 }
 
-// getUsernameMap returns a map from node addresses to the client's username,
-// including only clients for which we know the username (including ourself).
+// getUsernameMap returns a map from node addresses to username,
+// including only clients for which we know the username. Also include ourselves
+// with the localAddress and localUsername.
 func (cl ClientList) getUsernameMap() map[NodeAddress]string {
+	// Learn more about creating an empty map: https://gobyexample.com/maps
+	// Learn more about iterating maps: https://gobyexample.com/range
+
 	usernames := make(map[NodeAddress]string)
 	for addr, client := range cl {
 		// No sense telling about the usernames that we don't know yet!
@@ -103,7 +117,7 @@ func (cl ClientList) getUsernameMap() map[NodeAddress]string {
 	}
 
 	// Don't forget to add ourselves!
-	usernames[localAddress] = *username
+	usernames[localAddress] = localUsername
 
 	return usernames
 }

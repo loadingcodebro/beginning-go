@@ -58,6 +58,12 @@ func TestRemoveClient(t *testing.T) {
 	testNode, err := smudge.CreateNodeByIP(net.ParseIP("127.0.0.1"), 9999)
 	CheckNoError(t, err)
 
+	testNode2, err := smudge.CreateNodeByIP(net.ParseIP("127.0.0.1"), 9998)
+	CheckNoError(t, err)
+
+	testNode3, err := smudge.CreateNodeByIP(net.ParseIP("127.0.0.1"), 9997)
+	CheckNoError(t, err)
+
 	var cases = []struct {
 		clientList     *ClientList
 		expectedResult *ClientList
@@ -66,14 +72,17 @@ func TestRemoveClient(t *testing.T) {
 			clientList: &ClientList{
 				NodeAddress("127.0.0.1:9999"): ChatClient{
 					username: "testing",
+					node:     testNode,
 				},
 				NodeAddress("127.0.0.2:9998"): ChatClient{
 					username: "testing2",
+					node:     testNode2,
 				},
 			},
 			expectedResult: &ClientList{
 				NodeAddress("127.0.0.2:9998"): ChatClient{
 					username: "testing2",
+					node:     testNode2,
 				},
 			},
 		},
@@ -81,17 +90,21 @@ func TestRemoveClient(t *testing.T) {
 			clientList: &ClientList{
 				NodeAddress("127.0.0.2:9998"): ChatClient{
 					username: "testing2",
+					node:     testNode2,
 				},
 				NodeAddress("127.0.0.1:9997"): ChatClient{
 					username: "testing",
+					node:     testNode3,
 				},
 			},
 			expectedResult: &ClientList{
 				NodeAddress("127.0.0.2:9998"): ChatClient{
 					username: "testing2",
+					node:     testNode2,
 				},
 				NodeAddress("127.0.0.1:9997"): ChatClient{
 					username: "testing",
+					node:     testNode3,
 				},
 			},
 		},
@@ -113,9 +126,11 @@ func TestRemoveClient(t *testing.T) {
 
 func TestAddClient(t *testing.T) {
 	localAddress = "192.168.0.101:8888"
-	*username = "unittest"
+	localUsername = "unittest"
 
 	testNode, err := smudge.CreateNodeByIP(net.ParseIP("192.168.0.10"), 9999)
+	CheckNoError(t, err)
+	testNode2, err := smudge.CreateNodeByIP(net.ParseIP("192.168.0.5"), 9998)
 	CheckNoError(t, err)
 	testNodeLocal, err := smudge.CreateNodeByIP(net.ParseIP("192.168.0.101"), 8888)
 	CheckNoError(t, err)
@@ -129,6 +144,7 @@ func TestAddClient(t *testing.T) {
 			clientList: &ClientList{
 				NodeAddress("192.168.0.5:9998"): ChatClient{
 					username: "testing2",
+					node:     testNode2,
 				},
 			},
 			expectedResult: &ClientList{
@@ -138,23 +154,26 @@ func TestAddClient(t *testing.T) {
 				},
 				NodeAddress("192.168.0.5:9998"): ChatClient{
 					username: "testing2",
+					node:     testNode2,
 				},
 			},
 			nodeToAdd: testNode,
 		},
 		{ // Test that if the client is us, the username is added
 			clientList: &ClientList{
-				NodeAddress("192.168.0.10:9997"): ChatClient{
+				NodeAddress("192.168.0.10:9999"): ChatClient{
 					username: "testing",
+					node:     testNode,
 				},
 			},
 			expectedResult: &ClientList{
 				NodeAddress(localAddress): ChatClient{
-					username: *username,
+					username: localUsername,
 					node:     testNodeLocal,
 				},
-				NodeAddress("192.168.0.10:9997"): ChatClient{
+				NodeAddress("192.168.0.10:9999"): ChatClient{
 					username: "testing",
+					node:     testNode,
 				},
 			},
 			nodeToAdd: testNodeLocal,
@@ -182,7 +201,12 @@ func TestAddClient(t *testing.T) {
 
 func TestGetUsernameMap(t *testing.T) {
 	localAddress = "192.168.0.101:8888"
-	*username = "unittest"
+	localUsername = "unittest"
+
+	testNode, err := smudge.CreateNodeByIP(net.ParseIP("127.0.0.1"), 9999)
+	CheckNoError(t, err)
+	testNode2, err := smudge.CreateNodeByIP(net.ParseIP("127.0.0.2"), 9998)
+	CheckNoError(t, err)
 
 	var cases = []struct {
 		clientList     *ClientList
@@ -192,31 +216,34 @@ func TestGetUsernameMap(t *testing.T) {
 			clientList: &ClientList{
 				NodeAddress("127.0.0.1:9999"): ChatClient{
 					username: "testing",
+					node:     testNode,
 				},
 				NodeAddress("127.0.0.2:9998"): ChatClient{
 					username: "testing2",
+					node:     testNode2,
 				},
 			},
 			expectedResult: map[NodeAddress]string{
 				NodeAddress("127.0.0.1:9999"): "testing",
 				NodeAddress("127.0.0.2:9998"): "testing2",
-				NodeAddress(localAddress):     *username,
+				NodeAddress(localAddress):     localUsername,
 			},
 		},
 		{ // Test that clients with no usernames are not included
 			clientList: &ClientList{
 				NodeAddress("127.0.0.1:9999"): ChatClient{
 					username: "",
+					node:     testNode,
 				},
 			},
 			expectedResult: map[NodeAddress]string{
-				NodeAddress(localAddress): *username,
+				NodeAddress(localAddress): localUsername,
 			},
 		},
 		{ // Test that it still works if there are no clients connected
 			clientList: &ClientList{},
 			expectedResult: map[NodeAddress]string{
-				NodeAddress(localAddress): *username,
+				NodeAddress(localAddress): localUsername,
 			},
 		},
 	}
@@ -231,6 +258,11 @@ func TestGetUsernameMap(t *testing.T) {
 	}
 }
 func TestGetMissingUsername(t *testing.T) {
+	testNode, err := smudge.CreateNodeByIP(net.ParseIP("127.0.0.1"), 9999)
+	CheckNoError(t, err)
+	testNode2, err := smudge.CreateNodeByIP(net.ParseIP("127.0.0.2"), 9998)
+	CheckNoError(t, err)
+
 	var cases = []struct {
 		clientList         *ClientList
 		expectedResultBool bool
@@ -240,9 +272,11 @@ func TestGetMissingUsername(t *testing.T) {
 			clientList: &ClientList{
 				NodeAddress("127.0.0.1:9999"): ChatClient{
 					username: "testing",
+					node:     testNode,
 				},
 				NodeAddress("127.0.0.2:9998"): ChatClient{
 					username: "testing2",
+					node:     testNode2,
 				},
 			},
 			expectedResultBool: false,
@@ -250,7 +284,9 @@ func TestGetMissingUsername(t *testing.T) {
 		},
 		{ // Test that a missing username is returned
 			clientList: &ClientList{
-				NodeAddress("127.0.0.1:9999"): ChatClient{},
+				NodeAddress("127.0.0.1:9999"): ChatClient{
+					node: testNode,
+				},
 			},
 			expectedResultBool: true,
 			expectedResultAddr: NodeAddress("127.0.0.1:9999"),
@@ -276,6 +312,9 @@ func TestGetMissingUsername(t *testing.T) {
 }
 
 func TestAddUsernames(t *testing.T) {
+	testNode, err := smudge.CreateNodeByIP(net.ParseIP("127.0.0.1"), 9999)
+	CheckNoError(t, err)
+
 	cases := []struct {
 		clientList     *ClientList
 		usernames      map[NodeAddress]string
@@ -283,7 +322,9 @@ func TestAddUsernames(t *testing.T) {
 	}{
 		{ // Simple case where the username has an entry we need
 			clientList: &ClientList{
-				NodeAddress("127.0.0.1:9999"): ChatClient{},
+				NodeAddress("127.0.0.1:9999"): ChatClient{
+					node: testNode,
+				},
 			},
 			usernames: map[NodeAddress]string{
 				NodeAddress("127.0.0.1:9999"): "tester",
@@ -291,6 +332,7 @@ func TestAddUsernames(t *testing.T) {
 			expectedResult: &ClientList{
 				NodeAddress("127.0.0.1:9999"): ChatClient{
 					username: "tester",
+					node:     testNode,
 				},
 			},
 		},
@@ -298,6 +340,7 @@ func TestAddUsernames(t *testing.T) {
 			clientList: &ClientList{
 				NodeAddress("127.0.0.1:9999"): ChatClient{
 					username: "tester",
+					node:     testNode,
 				},
 			},
 			usernames: map[NodeAddress]string{
@@ -306,6 +349,7 @@ func TestAddUsernames(t *testing.T) {
 			expectedResult: &ClientList{
 				NodeAddress("127.0.0.1:9999"): ChatClient{
 					username: "new-tester",
+					node:     testNode,
 				},
 			},
 		},
@@ -313,6 +357,7 @@ func TestAddUsernames(t *testing.T) {
 			clientList: &ClientList{
 				NodeAddress("127.0.0.1:9999"): ChatClient{
 					username: "tester",
+					node:     testNode,
 				},
 			},
 			usernames: map[NodeAddress]string{
@@ -321,6 +366,7 @@ func TestAddUsernames(t *testing.T) {
 			expectedResult: &ClientList{
 				NodeAddress("127.0.0.1:9999"): ChatClient{
 					username: "tester",
+					node:     testNode,
 				},
 			},
 		},

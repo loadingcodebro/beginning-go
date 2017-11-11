@@ -177,7 +177,7 @@ func SendMessage(text string) error {
 	}
 
 	// First let's make the message show up in our own chat history
-	printChatMessage(text, *username)
+	printChatMessage(text, localUsername)
 
 	// Now we can send it on to others
 	msg := message{

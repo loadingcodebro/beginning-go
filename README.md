@@ -108,8 +108,11 @@ tests.
 
 ## Fill in the Blanks
 
-Read through the code, run the unit tests, implement the missing parts. Remember
-to work with your partner, and ask another group if you get stuck.
+Read through the code, run the unit tests, implement the missing parts. You
+should skim through `main.go` and `message.go` but you only need to write code
+in `client.go`. The related tests are located in `client_test.go`.
+
+Remember to work with your partner, and ask another group if you get stuck.
 
 ## Connect to Others
 

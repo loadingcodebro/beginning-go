@@ -131,7 +131,7 @@ func (cl ClientList) FillMissingInfo() {
 // first client encountered which is missing the username.
 // If all usernames are known, an empty address and false are returned.
 func (cl ClientList) GetMissingUsername() (NodeAddress, bool) {
-	// TODO: Implement this functiono
+	// TODO: Implement this function
 	// More info about iterating maps: https://gobyexample.com/range
 	return NodeAddress(""), false
 }
